@@ -88,9 +88,9 @@ def readTilt(cache):
                 #print(beacons)
                 for beacon in beacons:
                     if beacon['uuid'] in TILTS.keys():
-                        cache[TILTS[beacon['uuid']]] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time()}
+                        cache[TILTS[beacon['uuid']]] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
                         #logging.info(cache)
-                        #logging.info("Tilt data received: Temp %s Gravity %s" % (beacon['major'], beacon['minor']))
+                        logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
                         time.sleep(4)
         except Exception as e:
             logging.error("Error starting Bluetooth device, exception: %s" % str(e))
@@ -101,7 +101,7 @@ def readTilt(cache):
 
 
 @parameters([Property.Select(label="Sensor color", options=["Red", "Green", "Black", "Purple", "Orange", "Blue", "Yellow", "Pink"], description="Select the color of your Tilt"),
-	         Property.Select(label= "Data Type", options=["Temperature", "Gravity"], description="Select which type of data to register for this sensor"),
+	         Property.Select(label= "Data Type", options=["Temperature", "Gravity","RSSI"], description="Select which type of data to register for this sensor"),
 	         Property.Select(label="Gravity Units", options=["SG", "Brix", "Plato"], description="Converts the gravity reading to this unit if the Data Type is set to Gravity"),
 	         Property.Text(label="Calibration Point 1", configurable=True, default_value="", description="Optional field for calibrating your Tilt. Enter data in the format uncalibrated=actual"),
              Property.Text(label="Calibration Point 2", configurable=True, default_value="", description="Optional field for calibrating your Tilt. Enter data in the format uncalibrated=actual"),
@@ -153,11 +153,17 @@ class BLESensor(CBPiSensor):
                         self.time_old = current_time
                         self.value = reading
                         self.log_data(self.value)
-                else:
+                elif self.sensorType == "Temperature":
                     self.TEMP_UNIT=self.get_config_value("TEMP_UNIT", "C")
                     if current_time > self.time_old:
                         reading = calcTemp(tilt_cache[self.color]['Temp'],self.TEMP_UNIT)
                         reading = round(reading, 2)
+                        self.time_old = current_time 
+                        self.value=reading
+                        self.log_data(self.value)
+                else:
+                    if current_time > self.time_old:
+                        reading = tilt_cache[self.color]['RSSI']
                         self.time_old = current_time 
                         self.value=reading
                         self.log_data(self.value)

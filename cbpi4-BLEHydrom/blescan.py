@@ -186,7 +186,8 @@ def parse_events(sock, loop_count=100):
                     beacons.append({
                         'uuid': returnstringpacket(pkt[report_pkt_offset - 22: report_pkt_offset - 6]),
                         'minor': returnnumberpacket(pkt[report_pkt_offset - 4: report_pkt_offset - 2]),
-                        'major': returnnumberpacket(pkt[report_pkt_offset - 6: report_pkt_offset - 4])
+                        'major': returnnumberpacket(pkt[report_pkt_offset - 6: report_pkt_offset - 4]),
+                        'rssi': int.from_bytes(pkt[report_pkt_offset -1].to_bytes(1,'little'),byteorder='big', signed=True)
                     })
                 done = True
                 #print(beacons)
