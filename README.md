@@ -9,6 +9,7 @@ sudo apt-get install pkg-config libboost-python-dev libboost-thread-dev libbluet
 
 ###Changelog:
 
+- 16.01.22: (0.0.3) Reduced mqtt traffic (->cbpi .0.1.2 required!!)
 - 08.01.22: (0.0.2) Added RSSI value from blescan as parameter
 - 07.01.22: (0.0.1) Initial Commit
 

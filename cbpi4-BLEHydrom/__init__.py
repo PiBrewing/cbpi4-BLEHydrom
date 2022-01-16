@@ -161,14 +161,16 @@ class BLESensor(CBPiSensor):
                         self.time_old = current_time 
                         self.value=reading
                         self.log_data(self.value)
+                        self.push_update(self.value)
                 else:
                     if current_time > self.time_old:
                         reading = tilt_cache[self.color]['RSSI']
                         self.time_old = current_time 
                         self.value=reading
                         self.log_data(self.value)
+                        self.push_update(self.value)
                         
-                self.push_update(self.value)
+                self.push_update(self.value,False)
 
             await asyncio.sleep(2)
     
