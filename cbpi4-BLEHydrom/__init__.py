@@ -11,7 +11,7 @@ import random
 from cbpi.api import *
 import bluetooth._bluetooth as bluez
 from . import blescan
-from bleak import BleakScanner
+#from bleak import BleakScanner
 
 logger = logging.getLogger(__name__)
 
