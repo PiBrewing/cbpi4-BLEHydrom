@@ -10,7 +10,9 @@ You need to run this on a Raspberry that has bluetooth onboard or a bluetooth do
 
 ## Installation
 
-Before you can install this plugin, you will need to install a couple of additional packages manually. The plugin has been only tested yet with Raspberry Pi Bullseye 32 bit where it is confirmed to be working with the Hydrom and the Tilt 
+Before you can install this plugin, you will need to install a couple of additional packages manually. The plugin has been only tested yet with Raspberry Pi Bullseye 32 bit where it is confirmed to be working with the Hydrom and the Tilt
+
+ 
 `sudo apt-get install pkg-config libboost-python-dev libboost-thread-dev libbluetooth-dev libglib2.0-dev python3-dev`
 
 Once these packages have been isntalled, you need to install and activate the plugin on your system. 
@@ -20,9 +22,11 @@ You can either install it directly from pypi.org via:
 `sudo pip3 install cbpi4-BLEHydrom`
 
 or from the GITHub repo via:
+
 `sudo pip3 install https://github.com/avollkopf/cbpi4-BLEHydrom/archive/main.zip`
 
 Afterwards, you need to activate it in cbpi with the following command (this won't be required for future versions of cbpi):
+
 `cbpi add cbpi4-BLEHydrom`
 
 ## Configuration
