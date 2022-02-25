@@ -55,6 +55,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ###Changelog:
 
+- 25.02.22: (0.0.4) Updated README
 - 16.01.22: (0.0.3) Reduced mqtt traffic (->cbpi 4.0.1.2 required!!)
 - 08.01.22: (0.0.2) Added RSSI value from blescan as parameter
 - 07.01.22: (0.0.1) Initial Commit
