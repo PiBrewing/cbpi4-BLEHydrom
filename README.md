@@ -25,10 +25,6 @@ or from the GITHub repo via:
 
 `sudo pip3 install https://github.com/avollkopf/cbpi4-BLEHydrom/archive/main.zip`
 
-Afterwards, you need to activate it in cbpi with the following command (this won't be required for future versions of cbpi):
-
-`cbpi add cbpi4-BLEHydrom`
-
 ## Configuration
 
 ### CraftBeerPi Configuration
@@ -55,6 +51,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ###Changelog:
 
+- 11.05.22: (0.0.5) Updated README (removed cbpi add)
 - 25.02.22: (0.0.4) Updated README
 - 16.01.22: (0.0.3) Reduced mqtt traffic (->cbpi 4.0.1.2 required!!)
 - 08.01.22: (0.0.2) Added RSSI value from blescan as parameter
