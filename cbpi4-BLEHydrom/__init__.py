@@ -85,11 +85,10 @@ def readTilt(cache):
 
             while True:
                 beacons = distinct(blescan.parse_events(sock, 10))
-                #print(beacons)
+  
                 for beacon in beacons:
                     if beacon['uuid'] in TILTS.keys():
                         cache[TILTS[beacon['uuid']]] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
-                        #logging.info(cache)
                         logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
                         time.sleep(4)
         except Exception as e:

@@ -51,6 +51,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ###Changelog:
 
+- 10.01.23: (0.0.6.a2) Test with PyBluez Mod as interim solution
 - 01.12.23: (0.0.6.a1) updated requirements
 - 11.05.22: (0.0.5) Updated README (removed cbpi add)
 - 25.02.22: (0.0.4) Updated README
