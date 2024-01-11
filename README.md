@@ -15,15 +15,18 @@ Before you can install this plugin, you will need to install a couple of additio
  
 `sudo apt-get install pkg-config libboost-python-dev libboost-thread-dev libbluetooth-dev libglib2.0-dev python3-dev`
 
-Once these packages have been isntalled, you need to install and activate the plugin on your system. 
+Once these packages have been installed, you need to install the plugin on your system. 
 
-You can either install it directly from pypi.org via:
+Please follow th instructions from the [documentation](https://openbrewing.gitbook.io/craftbeerpi4_support/readme/plugin-installation).
 
-`sudo pip3 install cbpi4-BLEHydrom`
+- Package name:  cbpi4-BLEHydrom
 
-or from the GITHub repo via:
+- Package Github link: https://github.com/pibrewing/cbpi4-BLEHydrom/archive/main.zip
 
-`sudo pip3 install https://github.com/avollkopf/cbpi4-BLEHydrom/archive/main.zip`
+Python needs also special rights, to access the bluetooth resources. Therefore you need to run the following command on bookworm that comes with python 3.11:
+
+`sudo setcap 'cap_net_raw,cap_net_admin+eip' /usr/bin/python3.11`
+
 
 ## Configuration
 
@@ -49,7 +52,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 - These calibration procedures work the same for both gravity readings and temperature readings, and are calculated after the conversion to the desired units (°C to °F, SG to Brix), so you should calibrate your Tilt with the units set to what they will be when you use it for actual brewing.
 
 
-###Changelog:
+### Changelog:
 
 - 10.01.23: (0.0.6.a2) Test with PyBluez Mod as interim solution
 - 01.12.23: (0.0.6.a1) updated requirements
