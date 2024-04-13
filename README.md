@@ -54,6 +54,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ### Changelog:
 
+- 13.04.24: (0.0.7) Test with new gattlib-dbus package
 - 10.01.23: (0.0.6) Test with PyBluez Mod as interim solution
 - 01.12.23: (0.0.6.a1) updated requirements
 - 11.05.22: (0.0.5) Updated README (removed cbpi add)

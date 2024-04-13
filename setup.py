@@ -18,7 +18,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setup(name='cbpi4-BLEHydrom',
-      version='0.0.6',
+      version='0.0.7',
       description='CraftBeerPi4 Plugin for Hydrom and Tilt (BLE connection)',
       author='Alexander Vollkopf',
       author_email='avollkopf@web.de',
@@ -31,7 +31,7 @@ setup(name='cbpi4-BLEHydrom',
       packages=['cbpi4-BLEHydrom'],
       install_requires=[
       'PyBluez @ https://github.com/AcrossTheCloud/pybluez/archive/master.zip#egg=PyBluez-0.30',
-      'gattlib==0.20210616',
+      'gattlib-dbus @ https://github.com/oscaracena/pygattlib/archive/dbus.zip#egg=gattlib-dbus-24.1.8',
       ],
       long_description=long_description,
       long_description_content_type='text/markdown'
