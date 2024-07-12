@@ -88,8 +88,15 @@ def readTilt(cache):
   
                 for beacon in beacons:
                     if beacon['uuid'] in TILTS.keys():
-                        cache[TILTS[beacon['uuid']]] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
-                        logging.error[cache]
+                        if int(beacon['minor']) < 2000:
+                            # Tilt regular or Hydrom
+                            cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
+                        else:
+                            # Tilt mini pro
+                            temp=float(beacon['major'])/10
+                            gravity=int(beacon['minor'])-9000
+                            cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
+                        logging.error(cache)
                         logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
                         time.sleep(4)
         except Exception as e:
@@ -118,8 +125,9 @@ class BLESensor(CBPiSensor):
         self.x_cal_2=self.props.get("Calibration Point 2","")
         self.x_cal_3=self.props.get("Calibration Point 3","")
 
-        self.color=self.props.get("Sensor color","")
-        self.device = self.props.get("Hardware","Hydrom / Tilt")
+        self.device_color=self.props.get("Sensor color","Green")
+        self.device = "_0" if self.props.get("Hardware","Hydrom / Tilt") == "Hydrom / Tilt" else "_1"
+        self.color = self.device_color + self.device
         self.sensorType=self.props.get("Data Type","Temperature")
         self.unitsGravity=self.props.get("Gravity Units","Plato")
         self.time_old = float(0)
