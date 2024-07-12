@@ -94,9 +94,9 @@ def readTilt(cache):
                         else:
                             # Tilt mini pro
                             temp=float(beacon['major'])/10
-                            gravity=int(beacon['minor'])-9000
+                            gravity=float(beacon['minor'])/10
                             cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-                        logging.error(cache)
+                        logging.info(cache)
                         logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
                         time.sleep(4)
         except Exception as e:
@@ -118,7 +118,7 @@ class BLESensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(BLESensor, self).__init__(cbpi, id, props)
-        global titl_cache
+        global tilt_cache
         self.value = 0
         self.calibration_equ=""
         self.x_cal_1=self.props.get("Calibration Point 1","")
