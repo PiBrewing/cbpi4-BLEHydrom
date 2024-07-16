@@ -108,7 +108,7 @@ def readTilt(cache):
 
 
 @parameters([Property.Select(label="Sensor color", options=["Red", "Green", "Black", "Purple", "Orange", "Blue", "Yellow", "Pink"], description="Select the color of your Tilt"),
-             Property.Select(label="Hardware", options=["Hydrom / Tilt", "Tilt Mini Pro"], description="Select the device Type (Default is Hydrom / Tilt)"),
+             Property.Select(label="Hardware", options=["Hydrom / Tilt", "Tilt Pro / Pro Mini"], description="Select the device Type (Default is Hydrom / Tilt)"),
 	         Property.Select(label= "Data Type", options=["Temperature", "Gravity","RSSI"], description="Select which type of data to register for this sensor"),
 	         Property.Select(label="Gravity Units", options=["SG", "Brix", "Plato"], description="Converts the gravity reading to this unit if the Data Type is set to Gravity"),
 	         Property.Text(label="Calibration Point 1", configurable=True, default_value="", description="Optional field for calibrating your Tilt. Enter data in the format uncalibrated=actual"),

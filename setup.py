@@ -18,7 +18,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setup(name='cbpi4-BLEHydrom',
-      version='0.0.8.a3',
+      version='0.0.8.rc1',
       description='CraftBeerPi4 Plugin for Hydrom and Tilt (BLE connection)',
       author='Alexander Vollkopf',
       author_email='avollkopf@web.de',
