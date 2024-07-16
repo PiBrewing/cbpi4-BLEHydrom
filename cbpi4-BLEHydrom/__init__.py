@@ -159,7 +159,7 @@ class BLESensor(CBPiSensor):
                     if current_time > self.time_old:
                         reading = calcGravity(tilt_cache[self.color]['Gravity'], self.unitsGravity)
                         reading = calibrate(reading, self.calibration_equ)
-                        reading = round(reading, 3)
+                        reading = round(reading, 4)
                         self.time_old = current_time
                         self.value = reading
                         self.log_data(self.value)
