@@ -35,11 +35,12 @@ Python needs also special rights, to access the bluetooth resources. Therefore y
 2. Click the **Add** button in the Sensor section, and fill out the sensor properties:
     1. **Name**: Give the sensor a name. This is specific to this sensor reading, and does not need to match the Tilt color. It can be something like Wort Gravity or Tilt Temperature.
     2. **Type**: Choose BLEHydrom.
-    3. **Tilt Color**: This should be set to the color of your Tilt or color config of your Hydrom
-    4. **Data Type**: Each Tilt has three types of data that it reports, the Temperature,Gravity and RSSI, so select the one that you are configuring for this particular sensor. 
-    5. **Gravity Units**: *This field is only required if Data Type is set to Gravity*. The Tilt converts its readings into Specific Gravity by default. However you can choose one of three types here and it will be converted to that unit automatically. The choices are SG (Specific Gravity), Brix (or °Bx), and Plato (or °P).
-    6. **Calibration Point 1-3***: *Optional*. These fields allow you to calibrate your Tilt by entering an uncalibrated reading from the Tilt and then the desired, calibrated value. The format to use is ***uncalibrated value* = *actual value*** (spacing is optional). More info on calibration is in the section below.
-    7. Once you have filled out the sensor fields, click **Add**.
+    3. **Tilt Color**: This should be set to the color of your Tilt or color config of your Hydrom.
+    4. **Hardware**: Here you must select if you are using a Tilt / Hydrom or one of the Tilt pro series. Pro series devices can be used in parallel with a Tilt or Hydrom of the same color.
+    5. **Data Type**: Each Tilt has three types of data that it reports, the Temperature,Gravity and RSSI, so select the one that you are configuring for this particular sensor. 
+    6. **Gravity Units**: *This field is only required if Data Type is set to Gravity*. The Tilt converts its readings into Specific Gravity by default. However you can choose one of three types here and it will be converted to that unit automatically. The choices are SG (Specific Gravity), Brix (or °Bx), and Plato (or °P).
+    7. **Calibration Point 1-3***: *Optional*. These fields allow you to calibrate your Tilt by entering an uncalibrated reading from the Tilt and then the desired, calibrated value. The format to use is ***uncalibrated value* = *actual value*** (spacing is optional). More info on calibration is in the section below.
+    8. Once you have filled out the sensor fields, click **Add**.
 3. Repeat the above steps if you want additional sensors for the other data types that your Tilt reports, or if you have more than one Tilt, you can create sensors for those devices as well.
 4. You can now add any of the Tilt sensors to kettles or fermenters in your brewery, or you can view their data on the dashboard or graph their data with the charts.
 
@@ -54,12 +55,13 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ### Changelog:
 
-- 13.04.24: (0.0.7) Test with new gattlib-dbus package
-- 10.01.23: (0.0.6) Test with PyBluez Mod as interim solution
-- 01.12.23: (0.0.6.a1) updated requirements
-- 11.05.22: (0.0.5) Updated README (removed cbpi add)
-- 25.02.22: (0.0.4) Updated README
-- 16.01.22: (0.0.3) Reduced mqtt traffic (->cbpi 4.0.1.2 required!!)
-- 08.01.22: (0.0.2) Added RSSI value from blescan as parameter
-- 07.01.22: (0.0.1) Initial Commit
+- 13.07.24: (0.0.8) Addition of Tilt Pro series.
+- 13.04.24: (0.0.7) Test with new gattlib-dbus package.
+- 10.01.23: (0.0.6) Test with PyBluez Mod as interim solution.
+- 01.12.23: (0.0.6.a1) updated requirements.
+- 11.05.22: (0.0.5) Updated README (removed cbpi add).
+- 25.02.22: (0.0.4) Updated README.
+- 16.01.22: (0.0.3) Reduced mqtt traffic (->cbpi 4.0.1.2 required!!).
+- 08.01.22: (0.0.2) Added RSSI value from blescan as parameter.
+- 07.01.22: (0.0.1) Initial Commit.
 

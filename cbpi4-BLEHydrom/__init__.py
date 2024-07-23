@@ -88,7 +88,15 @@ def readTilt(cache):
   
                 for beacon in beacons:
                     if beacon['uuid'] in TILTS.keys():
-                        cache[TILTS[beacon['uuid']]] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
+                        if int(beacon['minor']) < 2000:
+                            # Tilt regular or Hydrom
+                            cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
+                        else:
+                            # Tilt mini pro
+                            temp=float(beacon['major'])/10
+                            gravity=float(beacon['minor'])/10
+                            cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
+                        logging.info(cache)
                         logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
                         time.sleep(4)
         except Exception as e:
@@ -100,6 +108,7 @@ def readTilt(cache):
 
 
 @parameters([Property.Select(label="Sensor color", options=["Red", "Green", "Black", "Purple", "Orange", "Blue", "Yellow", "Pink"], description="Select the color of your Tilt"),
+             Property.Select(label="Hardware", options=["Hydrom / Tilt", "Tilt Pro / Pro Mini"], description="Select the device Type (Default is Hydrom / Tilt)"),
 	         Property.Select(label= "Data Type", options=["Temperature", "Gravity","RSSI"], description="Select which type of data to register for this sensor"),
 	         Property.Select(label="Gravity Units", options=["SG", "Brix", "Plato"], description="Converts the gravity reading to this unit if the Data Type is set to Gravity"),
 	         Property.Text(label="Calibration Point 1", configurable=True, default_value="", description="Optional field for calibrating your Tilt. Enter data in the format uncalibrated=actual"),
@@ -109,14 +118,16 @@ class BLESensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(BLESensor, self).__init__(cbpi, id, props)
-        global titl_cache
+        global tilt_cache
         self.value = 0
         self.calibration_equ=""
         self.x_cal_1=self.props.get("Calibration Point 1","")
         self.x_cal_2=self.props.get("Calibration Point 2","")
         self.x_cal_3=self.props.get("Calibration Point 3","")
 
-        self.color=self.props.get("Sensor color","")
+        self.device_color=self.props.get("Sensor color","Green")
+        self.device = "_0" if self.props.get("Hardware","Hydrom / Tilt") == "Hydrom / Tilt" else "_1"
+        self.color = self.device_color + self.device
         self.sensorType=self.props.get("Data Type","Temperature")
         self.unitsGravity=self.props.get("Gravity Units","Plato")
         self.time_old = float(0)
@@ -148,7 +159,7 @@ class BLESensor(CBPiSensor):
                     if current_time > self.time_old:
                         reading = calcGravity(tilt_cache[self.color]['Gravity'], self.unitsGravity)
                         reading = calibrate(reading, self.calibration_equ)
-                        reading = round(reading, 3)
+                        reading = round(reading, 4)
                         self.time_old = current_time
                         self.value = reading
                         self.log_data(self.value)
