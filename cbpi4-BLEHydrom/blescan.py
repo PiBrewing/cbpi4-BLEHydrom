@@ -108,7 +108,7 @@ def hci_toggle_le_scan(sock, enable):
 
 
 def hci_le_set_scan_parameters(sock):
-    old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+    old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 16)
 
     SCAN_RANDOM = 0x01
     OWN_TYPE = SCAN_RANDOM
@@ -117,7 +117,7 @@ def hci_le_set_scan_parameters(sock):
 
     
 def parse_events(sock, loop_count=100):
-    old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+    old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 16)
 
     # perform a device inquiry on bluetooth device #0
     # The inquiry should last 8 * 1.28 = 10.24 seconds
@@ -134,7 +134,7 @@ def parse_events(sock, loop_count=100):
     for i in range(0, loop_count):
         pkt = sock.recv(255)
         ptype, event, plen = struct.unpack("BBB", pkt[:3])
-        #print "--------------" 
+        #print ("--------------")
         if event == bluez.EVT_INQUIRY_RESULT_WITH_RSSI:
              i =0
         elif event == bluez.EVT_NUM_COMP_PKTS:

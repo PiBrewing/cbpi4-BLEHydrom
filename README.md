@@ -25,7 +25,7 @@ Please follow th instructions from the [documentation](https://openbrewing.gitbo
 
 Python needs also special rights, to access the bluetooth resources. Therefore you need to run the following command on bookworm that comes with python 3.11:
 
-`sudo setcap 'cap_net_raw,cap_net_admin+eip' /usr/bin/python3.11`
+`sudo setcap 'cap_net_raw,cap_net_admin+eip' /usr/bin/python3.13`
 
 
 ## Configuration
@@ -55,6 +55,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ### Changelog:
 
+- 31.01.26: (0.0.9 alpha) Test under trixie with modified blescan (filter setting) due to issues. 
 - 13.07.24: (0.0.8) Addition of Tilt Pro series.
 - 13.04.24: (0.0.7) Test with new gattlib-dbus package.
 - 10.01.23: (0.0.6) Test with PyBluez Mod as interim solution.
