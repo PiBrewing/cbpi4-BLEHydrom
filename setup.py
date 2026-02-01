@@ -30,7 +30,7 @@ setup(name='cbpi4-BLEHydrom',
       'cbpi4-BLEHydrom': ['*','*.txt', '*.rst', '*.yaml']},
       packages=['cbpi4-BLEHydrom'],
       install_requires=[
-      'bleak'
+      'bleak',
       'construct'
       ],
       long_description=long_description,
