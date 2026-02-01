@@ -7,11 +7,18 @@ from aiohttp import web
 import logging
 from unittest.mock import MagicMock, patch
 import asyncio
-import random
+
+from uuid import UUID
+
+from construct import Array, Byte, Const, Int8sl, Int16ub, Struct
+from construct.core import ConstError
+
+from bleak import BleakScanner
+from bleak.backends.device import BLEDevice
+from bleak.backends.scanner import AdvertisementData
+
 from cbpi.api import *
-import bluetooth._bluetooth as bluez
-from . import blescan
-#from bleak import BleakScanner
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +41,51 @@ TILTS = {
 	'a495bb70c5b14b44b5121370f02d74de': 'Yellow',
 	'a495bb80c5b14b44b5121370f02d74de': 'Pink',
 }
+
+ibeacon_format = Struct(
+    "type_length" / Const(b"\x02\x15"),
+    "uuid" / Array(16, Byte),
+    "major" / Int16ub,
+    "minor" / Int16ub,
+    "power" / Int8sl,
+)
+
+
+class BLE_init(CBPiExtension):
+
+    def __init__(self, cbpi):
+        self.cbpi = cbpi
+        self._task = asyncio.create_task(self.init_scanner())
+
+    def device_found(
+        device: BLEDevice, advertisement_data: AdvertisementData
+    ):
+        """Decode iBeacon."""
+        try:
+            apple_data = advertisement_data.manufacturer_data[0x004C]
+            ibeacon = ibeacon_format.parse(apple_data)
+            uuid = UUID(bytes=bytes(ibeacon.uuid))
+            print(f"UUID     : {uuid}")
+            print(f"Major    : {ibeacon.major}")
+            print(f"Minor    : {ibeacon.minor}")
+            print(f"TX power : {ibeacon.power} dBm")
+            print(f"RSSI     : {device.rssi} dBm")
+            print(47 * "-")
+        except KeyError:
+            # Apple company ID (0x004c) not found
+            pass
+        except ConstError:
+            # No iBeacon (type 0x02 and length 0x15)
+            pass
+
+    async def init_scanner(self):
+        """Scan for devices."""
+        scanner = BleakScanner(device_found)
+        
+        while True:
+            await scanner.start()
+            await asyncio.sleep(1.0)
+            await scanner.stop()
 
 def add_calibration_point(x, y, field):
     if isinstance(field, str) and field:
@@ -74,36 +126,37 @@ def distinct(objects):
             seen.add(obj['uuid'])
     return unique
 
-def readTilt(cache):
-    dev_id = 0
-    while True:
-        try:
-            logging.info("Starting Bluetooth connection")
-            sock = bluez.hci_open_dev(dev_id)
-            blescan.hci_le_set_scan_parameters(sock)
-            blescan.hci_enable_le_scan(sock)
 
-            while True:
-                beacons = distinct(blescan.parse_events(sock, 10))
-  
-                for beacon in beacons:
-                    if beacon['uuid'] in TILTS.keys():
-                        if int(beacon['minor']) < 2000:
-                            # Tilt regular or Hydrom
-                            cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
-                        else:
-                            # Tilt mini pro
-                            temp=float(beacon['major'])/10
-                            gravity=float(beacon['minor'])/10
-                            cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-                        logging.info(cache)
-                        logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
-                        time.sleep(4)
-        except Exception as e:
-            logging.error("Error starting Bluetooth device, exception: %s" % str(e))
-
-        logging.info("Restarting Bluetooth process in 10 seconds")
-        time.sleep(10)
+#def readTilt(cache):
+#    dev_id = 0
+#    while True:
+#        try:
+#            logging.info("Starting Bluetooth connection")
+#            sock = bluez.hci_open_dev(dev_id)
+#            blescan.hci_le_set_scan_parameters(sock)
+#            blescan.hci_enable_le_scan(sock)##
+#
+#            while True:
+#                beacons = distinct(blescan.parse_events(sock, 10))
+#  
+#                for beacon in beacons:
+#                    if beacon['uuid'] in TILTS.keys():
+#                        if int(beacon['minor']) < 2000:
+#                            # Tilt regular or Hydrom
+#                            cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
+#                        else:
+#                            # Tilt mini pro
+#                            temp=float(beacon['major'])/10
+#                            gravity=float(beacon['minor'])/10
+#                            cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
+#                        logging.info(cache)
+#                        logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
+#                        time.sleep(4)
+#        except Exception as e:
+#            logging.error("Error starting Bluetooth device, exception: %s" % str(e))#
+#
+#        logging.info("Restarting Bluetooth process in 10 seconds")
+#        time.sleep(10)
 
 
 
@@ -200,4 +253,5 @@ def setup(cbpi):
     tilt_proc.daemon = True
     tilt_proc.start()
     cbpi.plugin.register("BLE Hydrom", BLESensor)
+    cbpi.plugin.register("BLE_init", BLE_init)
     pass
