@@ -24,11 +24,8 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 
-global tilt_cache
+global cache
 
-tilt_proc = None
-tilt_manager = None
-tilt_cache = {}
 cache = {}
 
 TILTS = {
@@ -65,18 +62,13 @@ class BLE_init(CBPiExtension):
             apple_data = advertisement_data.manufacturer_data[0x004C]
             ibeacon = ibeacon_format.parse(apple_data)
             uuid = UUID(bytes=bytes(ibeacon.uuid))
-            print(f"UUID     : {uuid}")
-            print(f"Major    : {ibeacon.major}")
-            print(f"Minor    : {ibeacon.minor}")
-            print(f"TX power : {ibeacon.power} dBm")
-            print(f"RSSI     : {device.rssi} dBm")
-            print(47 * "-")
-            beacon=[{
+            uuid = str(uuid).replace("-", "")
+            beacon={
                         'uuid': uuid,
                         'major': ibeacon.major,
                         'minor': ibeacon.minor,
                         'rssi': advertisement_data.rssi
-                    }]
+                    }
             if beacon['uuid'] in TILTS.keys():
                 if int(beacon['minor']) < 2000:
                     # Tilt regular or Hydrom
@@ -86,7 +78,7 @@ class BLE_init(CBPiExtension):
                     temp=float(beacon['major'])/10
                     gravity=float(beacon['minor'])/10
                     cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-                logging.info(cache)
+                logging.error(cache)
 
 
         except KeyError:
@@ -189,7 +181,7 @@ class BLESensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(BLESensor, self).__init__(cbpi, id, props)
-        global tilt_cache
+        global cache
         self.value = 0
         self.calibration_equ=""
         self.x_cal_1=self.props.get("Calibration Point 1","")
@@ -223,12 +215,12 @@ class BLESensor(CBPiSensor):
 
     async def run(self):
         while self.running is True:
-            if self.color in tilt_cache:
-                current_time = float(tilt_cache[self.color]['Time'])
+            if self.color in cache:
+                current_time = float(cache[self.color]['Time'])
                 #logging.info("Color: {} | Time Old: {} | Curent Time: {}".format(self.color,self.time_old,current_time))
                 if self.sensorType == "Gravity":
                     if current_time > self.time_old:
-                        reading = calcGravity(tilt_cache[self.color]['Gravity'], self.unitsGravity)
+                        reading = calcGravity(cache[self.color]['Gravity'], self.unitsGravity)
                         reading = calibrate(reading, self.calibration_equ)
                         reading = round(reading, 4)
                         self.time_old = current_time
@@ -237,7 +229,7 @@ class BLESensor(CBPiSensor):
                 elif self.sensorType == "Temperature":
                     self.TEMP_UNIT=self.get_config_value("TEMP_UNIT", "C")
                     if current_time > self.time_old:
-                        reading = calcTemp(tilt_cache[self.color]['Temp'],self.TEMP_UNIT)
+                        reading = calcTemp(cache[self.color]['Temp'],self.TEMP_UNIT)
                         reading = round(reading, 2)
                         self.time_old = current_time 
                         self.value=reading
@@ -245,7 +237,7 @@ class BLESensor(CBPiSensor):
                         self.push_update(self.value)
                 else:
                     if current_time > self.time_old:
-                        reading = tilt_cache[self.color]['RSSI']
+                        reading = cache[self.color]['RSSI']
                         self.time_old = current_time 
                         self.value=reading
                         self.log_data(self.value)
@@ -259,9 +251,6 @@ class BLESensor(CBPiSensor):
         return dict(value=self.value)
 
 def setup(cbpi):
-    global tilt_proc
-    global tilt_manager
-    global tilt_cache
     print ("INITIALIZE TILT MODULE")
     
     cbpi.plugin.register("BLE Hydrom", BLESensor)
