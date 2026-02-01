@@ -78,7 +78,7 @@ class BLE_init(CBPiExtension):
                     temp=float(beacon['major'])/10
                     gravity=float(beacon['minor'])/10
                     cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-                logging.error(cache)
+                logging.info(cache)
 
 
         except KeyError:
