@@ -127,49 +127,6 @@ def calcTemp(temp,unit):
 def calibrate(tilt, equation):
     return eval(equation)
 	
-def distinct(objects):
-    seen = set()
-    unique = []
-    for obj in objects:
-        if obj['uuid'] not in seen:
-            unique.append(obj)
-            seen.add(obj['uuid'])
-    return unique
-
-
-def readTilt(cache):
-    dev_id = 0
-#    while True:
-#        try:
-#            logging.info("Starting Bluetooth connection")
-#            sock = bluez.hci_open_dev(dev_id)
-#            blescan.hci_le_set_scan_parameters(sock)
-#            blescan.hci_enable_le_scan(sock)##
-#
-#            while True:
-#                beacons = distinct(blescan.parse_events(sock, 10))
-#  
-#                for beacon in beacons:
-#                    if beacon['uuid'] in TILTS.keys():
-#                        if int(beacon['minor']) < 2000:
-#                            # Tilt regular or Hydrom
-#                            cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
-#                        else:
-#                            # Tilt mini pro
-#                            temp=float(beacon['major'])/10
-#                            gravity=float(beacon['minor'])/10
-#                            cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-#                        logging.info(cache)
-#                        logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
-#                        time.sleep(4)
-#        except Exception as e:
-#            logging.error("Error starting Bluetooth device, exception: %s" % str(e))#
-#
-#        logging.info("Restarting Bluetooth process in 10 seconds")
-#        time.sleep(10)
-
-
-
 @parameters([Property.Select(label="Sensor color", options=["Red", "Green", "Black", "Purple", "Orange", "Blue", "Yellow", "Pink"], description="Select the color of your Tilt"),
              Property.Select(label="Hardware", options=["Hydrom / Tilt", "Tilt Pro / Pro Mini"], description="Select the device Type (Default is Hydrom / Tilt)"),
 	         Property.Select(label= "Data Type", options=["Temperature", "Gravity","RSSI"], description="Select which type of data to register for this sensor"),
