@@ -57,7 +57,7 @@ class BLE_init(CBPiExtension):
         self.cbpi = cbpi
         self._task = asyncio.create_task(self.init_scanner())
 
-    def device_found(
+    def device_found(self,
         device: BLEDevice, advertisement_data: AdvertisementData
     ):
         """Decode iBeacon."""
@@ -71,6 +71,24 @@ class BLE_init(CBPiExtension):
             print(f"TX power : {ibeacon.power} dBm")
             print(f"RSSI     : {device.rssi} dBm")
             print(47 * "-")
+            beacon=[{
+                        'uuid': uuid,
+                        'major': ibeacon.major,
+                        'minor': ibeacon.minor,
+                        'rssi': advertisement_data.rssi
+                    }]
+            if beacon['uuid'] in TILTS.keys():
+                if int(beacon['minor']) < 2000:
+                    # Tilt regular or Hydrom
+                    cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
+                else:
+                    # Tilt mini pro
+                    temp=float(beacon['major'])/10
+                    gravity=float(beacon['minor'])/10
+                    cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
+                logging.info(cache)
+
+
         except KeyError:
             # Apple company ID (0x004c) not found
             pass
@@ -80,7 +98,7 @@ class BLE_init(CBPiExtension):
 
     async def init_scanner(self):
         """Scan for devices."""
-        scanner = BleakScanner(device_found)
+        scanner = BleakScanner(self.device_found)
         
         while True:
             await scanner.start()
@@ -127,8 +145,8 @@ def distinct(objects):
     return unique
 
 
-#def readTilt(cache):
-#    dev_id = 0
+def readTilt(cache):
+    dev_id = 0
 #    while True:
 #        try:
 #            logging.info("Starting Bluetooth connection")
@@ -246,12 +264,6 @@ def setup(cbpi):
     global tilt_cache
     print ("INITIALIZE TILT MODULE")
     
-    tilt_manager = Manager()
-    tilt_cache = tilt_manager.dict()
-
-    tilt_proc = Process(name='readTilt', target=readTilt, args=(tilt_cache,))
-    tilt_proc.daemon = True
-    tilt_proc.start()
     cbpi.plugin.register("BLE Hydrom", BLESensor)
     cbpi.plugin.register("BLE_init", BLE_init)
     pass
