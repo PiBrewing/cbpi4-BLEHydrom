@@ -1,3 +1,5 @@
+# DO NOT USE THIS BRANCH - ONLY FOR TESTING WITH BLEAK AS BLE API
+
 # CraftbeerPi4 Sensor Plugin for Hydrom / Tilt
 
 Allows your Hydrom or Tilt digital hydrometer to send data to CraftBeerPi 4.0, such as the current temperature and gravity readings. The plugin allows you to create multiple sensors, each of which is associated with a different data type that the device is capturing, so that you can use these sensors as you would any other sensor in CraftBeerPi4. You can also use multiple Hydrom or/and Tilt devices for different fermentation chambers at the same time. See below for setup instructions and some screenshots of the configuration options.
