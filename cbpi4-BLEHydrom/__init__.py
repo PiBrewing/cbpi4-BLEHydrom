@@ -70,15 +70,32 @@ class BLE_init(CBPiExtension):
                         'rssi': advertisement_data.rssi
                     }
             if beacon['uuid'] in TILTS.keys():
+                time_new=time.time()
+                set_cache=False
                 if int(beacon['minor']) < 2000:
+                    try:
+                        time_old = float(cache[TILTS[beacon['uuid']]+"_0"]["Time"])
+                        if (time_new - time_old) > 15:
+                            set_cache=True
+                    except:
+                        set_cache=True
                     # Tilt regular or Hydrom
-                    cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
+                    if set_cache == True:
+                        cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time_new,'RSSI': beacon['rssi']}
+                        logging.error(cache)
                 else:
+                    try:
+                        time_old = float(cache[TILTS[beacon['uuid']]+"_1"]["Time"])
+                        if (time_new - time_old) > 5:
+                            set_cache=True
+                    except:
+                        set_cache=True
                     # Tilt mini pro
-                    temp=float(beacon['major'])/10
-                    gravity=float(beacon['minor'])/10
-                    cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-                logging.info(cache)
+                    if set_cache == True:
+                        temp=float(beacon['major'])/10
+                        gravity=float(beacon['minor'])/10
+                        cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time_new,'RSSI': beacon['rssi']}
+                        logging.error(cache)
 
 
         except KeyError:
