@@ -119,7 +119,8 @@ class BLE_init(CBPiExtension):
                 await asyncio.sleep(1.0)
                 await scanner.stop()
             except Exception as e:
-                logging.error("Error during BLE scanning: {}".format(e))    
+                logging.error("Error during BLE scanning: {}".format(e)) 
+                await asyncio.sleep(10.0)  # Wait before retrying   
             
 
 def add_calibration_point(x, y, field):
