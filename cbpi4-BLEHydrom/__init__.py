@@ -107,12 +107,20 @@ class BLE_init(CBPiExtension):
 
     async def init_scanner(self):
         """Scan for devices."""
-        scanner = BleakScanner(self.device_found)
+        try:
+            scanner = BleakScanner(self.device_found)
+        except Exception as e:
+            logging.error("BLE Scanner could not be started: {}".format(e))
+            return
         
         while True:
-            await scanner.start()
-            await asyncio.sleep(1.0)
-            await scanner.stop()
+            try:
+                await scanner.start()
+                await asyncio.sleep(1.0)
+                await scanner.stop()
+            except Exception as e:
+                logging.error("Error during BLE scanning: {}".format(e))    
+            
 
 def add_calibration_point(x, y, field):
     if isinstance(field, str) and field:
