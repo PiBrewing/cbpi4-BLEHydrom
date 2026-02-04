@@ -1,11 +1,7 @@
 
 # -*- coding: utf-8 -*-
-from multiprocessing import Process, Manager
 import time
-import os
-from aiohttp import web
 import logging
-from unittest.mock import MagicMock, patch
 import asyncio
 
 from uuid import UUID
@@ -234,8 +230,6 @@ class BLESensor(CBPiSensor):
         return dict(value=self.value)
 
 def setup(cbpi):
-    print ("INITIALIZE TILT MODULE")
-    
     cbpi.plugin.register("BLE Hydrom", BLESensor)
     cbpi.plugin.register("BLE_init", BLE_init)
     pass
