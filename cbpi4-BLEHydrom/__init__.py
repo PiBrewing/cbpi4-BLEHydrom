@@ -7,21 +7,25 @@ from aiohttp import web
 import logging
 from unittest.mock import MagicMock, patch
 import asyncio
-import random
+
+from uuid import UUID
+
+from construct import Array, Byte, Const, Int8sl, Int16ub, Struct
+from construct.core import ConstError
+
+from bleak import BleakScanner
+from bleak.backends.device import BLEDevice
+from bleak.backends.scanner import AdvertisementData
+
 from cbpi.api import *
-import bluetooth._bluetooth as bluez
-from . import blescan
-#from bleak import BleakScanner
+
 
 logger = logging.getLogger(__name__)
 
 import numpy as np
 
-global tilt_cache
+global cache
 
-tilt_proc = None
-tilt_manager = None
-tilt_cache = {}
 cache = {}
 
 TILTS = {
@@ -34,6 +38,90 @@ TILTS = {
 	'a495bb70c5b14b44b5121370f02d74de': 'Yellow',
 	'a495bb80c5b14b44b5121370f02d74de': 'Pink',
 }
+
+ibeacon_format = Struct(
+    "type_length" / Const(b"\x02\x15"),
+    "uuid" / Array(16, Byte),
+    "major" / Int16ub,
+    "minor" / Int16ub,
+    "power" / Int8sl,
+)
+
+
+class BLE_init(CBPiExtension):
+
+    def __init__(self, cbpi):
+        self.cbpi = cbpi
+        self._task = asyncio.create_task(self.init_scanner())
+
+    def device_found(self,
+        device: BLEDevice, advertisement_data: AdvertisementData
+    ):
+        """Decode iBeacon."""
+        try:
+            apple_data = advertisement_data.manufacturer_data[0x004C]
+            ibeacon = ibeacon_format.parse(apple_data)
+            uuid = UUID(bytes=bytes(ibeacon.uuid))
+            uuid = str(uuid).replace("-", "")
+            beacon={
+                        'uuid': uuid,
+                        'major': ibeacon.major,
+                        'minor': ibeacon.minor,
+                        'rssi': advertisement_data.rssi
+                    }
+            if beacon['uuid'] in TILTS.keys():
+                time_new=time.time()
+                set_cache=False
+                if int(beacon['minor']) < 2000:
+                    try:
+                        time_old = float(cache[TILTS[beacon['uuid']]+"_0"]["Time"])
+                        if (time_new - time_old) > 15:
+                            set_cache=True
+                    except:
+                        set_cache=True
+                    # Tilt regular or Hydrom
+                    if set_cache == True:
+                        cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time_new,'RSSI': beacon['rssi']}
+                        logging.error(cache)
+                else:
+                    try:
+                        time_old = float(cache[TILTS[beacon['uuid']]+"_1"]["Time"])
+                        if (time_new - time_old) > 5:
+                            set_cache=True
+                    except:
+                        set_cache=True
+                    # Tilt mini pro
+                    if set_cache == True:
+                        temp=float(beacon['major'])/10
+                        gravity=float(beacon['minor'])/10
+                        cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time_new,'RSSI': beacon['rssi']}
+                        logging.error(cache)
+
+
+        except KeyError:
+            # Apple company ID (0x004c) not found
+            pass
+        except ConstError:
+            # No iBeacon (type 0x02 and length 0x15)
+            pass
+
+    async def init_scanner(self):
+        """Scan for devices."""
+        try:
+            scanner = BleakScanner(self.device_found)
+        except Exception as e:
+            logging.error("BLE Scanner could not be started: {}".format(e))
+            return
+        
+        while True:
+            try:
+                await scanner.start()
+                await asyncio.sleep(1.0)
+                await scanner.stop()
+            except Exception as e:
+                logging.error("Error during BLE scanning: {}".format(e)) 
+                await asyncio.sleep(10.0)  # Wait before retrying   
+            
 
 def add_calibration_point(x, y, field):
     if isinstance(field, str) and field:
@@ -65,48 +153,6 @@ def calcTemp(temp,unit):
 def calibrate(tilt, equation):
     return eval(equation)
 	
-def distinct(objects):
-    seen = set()
-    unique = []
-    for obj in objects:
-        if obj['uuid'] not in seen:
-            unique.append(obj)
-            seen.add(obj['uuid'])
-    return unique
-
-def readTilt(cache):
-    dev_id = 0
-    while True:
-        try:
-            logging.info("Starting Bluetooth connection")
-            sock = bluez.hci_open_dev(dev_id)
-            blescan.hci_le_set_scan_parameters(sock)
-            blescan.hci_enable_le_scan(sock)
-
-            while True:
-                beacons = distinct(blescan.parse_events(sock, 10))
-  
-                for beacon in beacons:
-                    if beacon['uuid'] in TILTS.keys():
-                        if int(beacon['minor']) < 2000:
-                            # Tilt regular or Hydrom
-                            cache[TILTS[beacon['uuid']]+"_0"] = {'Temp': beacon['major'], 'Gravity': beacon['minor'], 'Time': time.time(),'RSSI': beacon['rssi']}
-                        else:
-                            # Tilt mini pro
-                            temp=float(beacon['major'])/10
-                            gravity=float(beacon['minor'])/10
-                            cache[TILTS[beacon['uuid']]+"_1"] = {'Temp': temp, 'Gravity': gravity, 'Time': time.time(),'RSSI': beacon['rssi']}
-                        logging.info(cache)
-                        logging.info("Tilt data received: Temp: %s Gravity: %s RSSI: %s" % (beacon['major'], beacon['minor'], beacon['rssi']))
-                        time.sleep(4)
-        except Exception as e:
-            logging.error("Error starting Bluetooth device, exception: %s" % str(e))
-
-        logging.info("Restarting Bluetooth process in 10 seconds")
-        time.sleep(10)
-
-
-
 @parameters([Property.Select(label="Sensor color", options=["Red", "Green", "Black", "Purple", "Orange", "Blue", "Yellow", "Pink"], description="Select the color of your Tilt"),
              Property.Select(label="Hardware", options=["Hydrom / Tilt", "Tilt Pro / Pro Mini"], description="Select the device Type (Default is Hydrom / Tilt)"),
 	         Property.Select(label= "Data Type", options=["Temperature", "Gravity","RSSI"], description="Select which type of data to register for this sensor"),
@@ -118,7 +164,7 @@ class BLESensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(BLESensor, self).__init__(cbpi, id, props)
-        global tilt_cache
+        global cache
         self.value = 0
         self.calibration_equ=""
         self.x_cal_1=self.props.get("Calibration Point 1","")
@@ -152,12 +198,12 @@ class BLESensor(CBPiSensor):
 
     async def run(self):
         while self.running is True:
-            if self.color in tilt_cache:
-                current_time = float(tilt_cache[self.color]['Time'])
+            if self.color in cache:
+                current_time = float(cache[self.color]['Time'])
                 #logging.info("Color: {} | Time Old: {} | Curent Time: {}".format(self.color,self.time_old,current_time))
                 if self.sensorType == "Gravity":
                     if current_time > self.time_old:
-                        reading = calcGravity(tilt_cache[self.color]['Gravity'], self.unitsGravity)
+                        reading = calcGravity(cache[self.color]['Gravity'], self.unitsGravity)
                         reading = calibrate(reading, self.calibration_equ)
                         reading = round(reading, 4)
                         self.time_old = current_time
@@ -166,7 +212,7 @@ class BLESensor(CBPiSensor):
                 elif self.sensorType == "Temperature":
                     self.TEMP_UNIT=self.get_config_value("TEMP_UNIT", "C")
                     if current_time > self.time_old:
-                        reading = calcTemp(tilt_cache[self.color]['Temp'],self.TEMP_UNIT)
+                        reading = calcTemp(cache[self.color]['Temp'],self.TEMP_UNIT)
                         reading = round(reading, 2)
                         self.time_old = current_time 
                         self.value=reading
@@ -174,7 +220,7 @@ class BLESensor(CBPiSensor):
                         self.push_update(self.value)
                 else:
                     if current_time > self.time_old:
-                        reading = tilt_cache[self.color]['RSSI']
+                        reading = cache[self.color]['RSSI']
                         self.time_old = current_time 
                         self.value=reading
                         self.log_data(self.value)
@@ -188,16 +234,8 @@ class BLESensor(CBPiSensor):
         return dict(value=self.value)
 
 def setup(cbpi):
-    global tilt_proc
-    global tilt_manager
-    global tilt_cache
     print ("INITIALIZE TILT MODULE")
     
-    tilt_manager = Manager()
-    tilt_cache = tilt_manager.dict()
-
-    tilt_proc = Process(name='readTilt', target=readTilt, args=(tilt_cache,))
-    tilt_proc.daemon = True
-    tilt_proc.start()
     cbpi.plugin.register("BLE Hydrom", BLESensor)
+    cbpi.plugin.register("BLE_init", BLE_init)
     pass

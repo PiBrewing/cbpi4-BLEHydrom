@@ -1,8 +1,10 @@
+# DO NOT USE THIS BRANCH - ONLY FOR TESTING WITH BLEAK AS BLE API
+
 # CraftbeerPi4 Sensor Plugin for Hydrom / Tilt
 
 Allows your Hydrom or Tilt digital hydrometer to send data to CraftBeerPi 4.0, such as the current temperature and gravity readings. The plugin allows you to create multiple sensors, each of which is associated with a different data type that the device is capturing, so that you can use these sensors as you would any other sensor in CraftBeerPi4. You can also use multiple Hydrom or/and Tilt devices for different fermentation chambers at the same time. See below for setup instructions and some screenshots of the configuration options.
 
-The plugin is poerted from the CraftbeerPi3 plugin Version (https://github.com/IndyJoeA/cbpi_Tilt)
+The ble beacon scan of the plugin is based on this code: https://koen.vervloesem.eu/blog/decoding-bluetooth-low-energy-advertisements-with-python-bleak-and-construct/
 
 ## Requirements
 
@@ -10,23 +12,43 @@ You need to run this on a Raspberry that has bluetooth onboard or a bluetooth do
 
 ## Installation
 
-Before you can install this plugin, you will need to install a couple of additional packages manually. The plugin has been only tested yet with Raspberry Pi Bullseye 32 bit where it is confirmed to be working with the Hydrom and the Tilt
-
- 
-`sudo apt-get install pkg-config libboost-python-dev libboost-thread-dev libbluetooth-dev libglib2.0-dev python3-dev`
-
-Once these packages have been installed, you need to install the plugin on your system. 
-
 Please follow th instructions from the [documentation](https://openbrewing.gitbook.io/craftbeerpi4_support/readme/plugin-installation).
 
 - Package name:  cbpi4-BLEHydrom
 
 - Package Github link: https://github.com/pibrewing/cbpi4-BLEHydrom/archive/main.zip
 
-Python needs also special rights, to access the bluetooth resources. Therefore you need to run the following command on bookworm that comes with python 3.11:
+If bluetooth is blocked, you need to activate it manually
 
-`sudo setcap 'cap_net_raw,cap_net_admin+eip' /usr/bin/python3.13`
+Check first, if the bluetooth service is blocked:
 
+`sudo rfkill list`
+
+This will give you the following output if bluetooth is blocked:
+
+```
+0: hci0: Bluetooth
+        Soft blocked: yes
+        Hard blocked: no
+1: phy0: Wireless LAN
+        Soft blocked: no
+        Hard blocked: no
+```
+
+Run the command `sudo rfkill unblock bluetooth` to activated bluetoth on the pi
+
+Another `sudo rfkill list` should show:
+
+```
+0: hci0: Bluetooth
+        Soft blocked: no
+        Hard blocked: no
+1: phy0: Wireless LAN
+        Soft blocked: no
+        Hard blocked: no
+```
+
+Then the softblock is disabled and the plugin should be working
 
 ## Configuration
 
@@ -55,6 +77,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ### Changelog:
 
+- 02.02.26: (1.0.0 alpha) Usage of bleak
 - 31.01.26: (0.0.10) modified blescan under trixie (filter setting) due to issues. Added pyproject.toml file
 - 13.07.24: (0.0.8) Addition of Tilt Pro series.
 - 13.04.24: (0.0.7) Test with new gattlib-dbus package.
