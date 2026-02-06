@@ -75,7 +75,7 @@ You can use the Calibration Point fields to calibrate your Tilt, much like when 
 
 ### Changelog:
 
-- 02.02.26: (1.0.0 alpha) Usage of bleak
+- 02.02.26: (1.0.0) Rewrite data collection routine to convert from obsolete pybluez/gattlib packages to bleak
 - 31.01.26: (0.0.10) modified blescan under trixie (filter setting) due to issues. Added pyproject.toml file
 - 13.07.24: (0.0.8) Addition of Tilt Pro series.
 - 13.04.24: (0.0.7) Test with new gattlib-dbus package.

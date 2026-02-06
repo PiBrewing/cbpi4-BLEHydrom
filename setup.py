@@ -18,12 +18,13 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setup(name='cbpi4-BLEHydrom',
-      version='1.0.0.a3',
+      version='1.0.0',
       description='CraftBeerPi4 Plugin for Hydrom and Tilt (BLE connection)',
       author='Alexander Vollkopf',
       author_email='avollkopf@web.de',
       url='https://github.com/avollkopf/cbpi4-BLEHydrom',
       include_package_data=True,
+      
       package_data={
         # If any package contains *.txt or *.rst files, include them:
       '': ['*.txt', '*.rst', '*.yaml'],
